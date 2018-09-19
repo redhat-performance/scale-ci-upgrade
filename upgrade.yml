@@ -1,0 +1,46 @@
+---
+- name: Edit the inventory file
+  hosts: localhost
+  roles:
+    - configure_inventory
+
+- name: Transfer and uncompress the cluster data
+  hosts: "{{ upgrade_host }}"
+  roles:
+    - handle_cluster_data
+
+- name: Load the cluster
+  hosts: "{{ upgrade_host }}"
+  roles:
+    - load_cluster
+
+- name: Install openshift-ansible on the localhost
+  hosts: "{{ upgrade_host }}"
+  become: true
+  roles:
+    - software_repositories
+    - install_configure
+
+- name: Backup the master nodes
+  hosts: masters
+  become: true
+  roles:
+    - backup_masters
+
+- name: Backup all the nodes
+  hosts: nodes
+  become: true
+  roles:
+    - backup_nodes
+
+- name: Update the software repositories
+  hosts: all
+  become: true
+  roles:
+    - software_repositories
+
+- name: Perform the upgrade
+  hosts: "{{ upgrade_host }}"
+  roles:
+    - upgrade_openshift
+    - verify_upgrade

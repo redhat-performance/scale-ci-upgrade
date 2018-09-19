@@ -1,0 +1,6 @@
+---
+- name: Uncompress the cluster data file
+  unarchive:
+    src: "{{ cluster_data_url | basename }}"
+    dest: "{{ ansible_user_dir }}/"
+  when: cluster_data_url != ""

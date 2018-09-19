@@ -1,0 +1,38 @@
+---
+- name: Copy the inventory file to host
+  copy:
+    src: "{{ inventory_path }}"
+    dest: "{{ inventory_path }}"
+
+- name: Perform the OpenShift upgrade
+  shell: >
+    ansible-playbook -vvv
+    -i {{ inventory_path }}
+    /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v{{ openshift_version_end | regex_replace('\.', '_') }}/upgrade.yml 2>&1 > upgrade.log
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+
+- name: "Wait for {{ delay_seconds }} seconds to allow pods to start"
+  pause:
+    seconds: "{{ delay_seconds }}"
+
+- name: Print out the node status after upgrade
+  shell: oc get nodes -o wide | tee upgraded_nodes.txt
+
+- name: Print out the current projects after upgrade
+  shell: oc get projects --all-namespaces | tee upgraded_projects.txt
+
+- name: Print out the current pods after upgrade
+  shell: oc get pods --all-namespaces | tee upgraded_pods.txt
+
+- name: Fetch the upgraded files
+  fetch:
+    src: "{{ item }}"
+    dest: "{{ backup_directory_local }}/"
+    flat: yes
+  with_items:
+    - upgrade.log
+    - upgraded_nodes.txt
+    - upgraded_projects.txt
+    - upgraded_pods.txt

@@ -1,0 +1,11 @@
+---
+- name: Copy over the new repositories
+  template:
+    backup: yes
+    src: "aos.repo.j2"
+    dest: "/etc/yum.repos.d/aos.repo"
+
+- name: Clean the yum metada cache
+  command: "yum clean all"
+  args:
+    warn: no

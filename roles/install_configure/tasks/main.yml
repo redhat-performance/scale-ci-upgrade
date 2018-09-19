@@ -1,0 +1,12 @@
+---
+- name: Install openshift-ansible from the package manager
+  package:
+    name: "openshift-ansible"
+    state: latest
+
+- name: Copy the ansible.cfg from openshift-ansible
+  copy:
+    backup: yes
+    dest: /etc/ansible/ansible.cfg
+    remote_src: yes
+    src: /usr/share/ansible/openshift-ansible/ansible.cfg

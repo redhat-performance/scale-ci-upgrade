@@ -1,0 +1,21 @@
+---
+- name: Edit the inventory file before the upgrade
+  replace:
+    backup: yes
+    path: "{{ inventory_path }}"
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  with_items:
+    - { regexp: 'ansible_ssh_private_key_file=".*?"', replace: '' }
+    - { regexp: '^openshift_release=.*$', replace: '' }
+    - { regexp: "^oreg_auth_user=.*$", replace: "oreg_auth_user={{ lookup('env', 'REG_AUTH_USER') }}" }
+    - { regexp: "^oreg_auth_password=.*$", replace: "oreg_auth_password={{ lookup('env','REG_AUTH_PASSWORD') }}" }
+
+- name: Reload the inventory file after making changes
+  meta: refresh_inventory
+
+- name: Download the cluster data
+  get_url:
+    url: "{{ cluster_data_url }}"
+    dest: "{{ playbook_dir }}/{{ cluster_data_url | basename }}"
+  when: cluster_data_url != ""
