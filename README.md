@@ -1,3 +1,5 @@
+# Deprecated. Please see https://github.com/openshift-scale/scale-ci-upgrade
+
 # scale-ci-upgrade
 
 Automate the upgrade of an OpenShift cluster between minor versions.
